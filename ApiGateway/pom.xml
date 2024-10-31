@@ -7,10 +7,10 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>APIgateway</artifactId>
+    <artifactId>ApiGateway</artifactId>
     <packaging>jar</packaging>
 
-    <name>APIgateway</name>
+    <name>ApiGateway</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -21,6 +21,16 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-gateway-mvc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+            <version>3.3.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot</artifactId>
+            <version>3.3.5</version>
         </dependency>
     </dependencies>
 </project>
