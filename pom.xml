@@ -18,8 +18,8 @@
   <modules>
     <module>ProductService</module>
     <module>OrderService</module>
-    <module>AuthService</module>
     <module>ApiGateway</module>
+    <module>UserService</module>
   </modules>
 
   <properties>
