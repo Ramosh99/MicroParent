@@ -17,13 +17,13 @@ public class UserService {
     private AuthService authService;
 
     // Create User
-    public Optional<User> createUser(User user) {
-        final User[] optionalUser = new User[1];
-        authService.addUser(user.getEmail(), user.getPassword(), user.getFirstName(), user.getLastName()).subscribe(
-                result ->
-                        optionalUser[0] = userRepository.save(user)
-        );
-        return Optional.ofNullable(optionalUser[0]);
+    public Mono<Optional<User>> createUser(User user) {
+        return authService.addUser(user.getEmail(), user.getPassword(), user.getFirstName(), user.getLastName())
+                .flatMap(result -> {
+                    User savedUser = userRepository.save(user);
+                    return Mono.just(Optional.of(savedUser));
+                })
+                .defaultIfEmpty(Optional.empty());
     }
 
     // Get User by Email

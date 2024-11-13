@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.AllArgsConstructor;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
@@ -65,39 +67,51 @@ public class AuthService{
     ){
         return logClient()
                 .flatMap(token -> {
-                    JsonNode jsonTemplate = loadJsonTemplate();
-
-                    if (jsonTemplate != null && jsonTemplate.isObject()) {
-                        ObjectNode modifiedJson = (ObjectNode) jsonTemplate;
-                        modifiedJson.put("firstname", firstName);
-                        modifiedJson.put("lastname", lastName);
-                        modifiedJson.put("password", password);
-                        modifiedJson.put("username", firstName + lastName);
-                        modifiedJson.put("email", email);
-
-                        return webClient.post()
-                                .uri(addUserEndpoint)
-                                .header("Authorization", "Bearer " + token)
-                                .header("Content-Type", "application/json")
-                                .bodyValue(modifiedJson)
-                                .retrieve()
-                                .toBodilessEntity()
-                                .map(response -> response.getStatusCode() == HttpStatus.CREATED);
-                    } else {
-                        return Mono.error(new RuntimeException("Failed to load JSON template"));
-                    }
+                    String mainObject = createJson(email, password, firstName, lastName);
+                    return webClient.post()
+                            .uri(addUserEndpoint)
+                            .header("Authorization", "Bearer " + token)
+                            .header("Content-Type", "application/json")
+                            .bodyValue(mainObject)
+                            .retrieve()
+                            .toBodilessEntity()
+                            .map(response -> response.getStatusCode() == HttpStatus.CREATED);
                 });
     }
 
     //manipulating json object
-    private JsonNode loadJsonTemplate() {
+    private String createJson(String email, String password, String firstName, String lastName) {
+        JSONObject mainObject = new JSONObject();
         try {
-            return objectMapper.readTree(new ClassPathResource("template.json").getInputStream());
-        } catch (IOException e) {
+            String attributeKey = "attribute_key";
+            String attributeValue = "test_value";
+            boolean temporary = false;
+            // Create JSON for "attributes"
+            JSONObject attributes = new JSONObject();
+            attributes.put(attributeKey, attributeValue);
+            // Create JSON for "credentials" (an array with one object)
+            JSONArray credentials = new JSONArray();
+            JSONObject credentialObject = new JSONObject();
+            credentialObject.put("temporary", temporary);
+            credentialObject.put("type", "password");
+            credentialObject.put("value", password);
+            credentials.put(credentialObject);
+            // Create the main JSON object and assign all properties
+            mainObject.put("attributes", attributes);
+            mainObject.put("credentials", credentials);
+            mainObject.put("username", firstName + lastName);
+            mainObject.put("firstName", firstName);
+            mainObject.put("lastName", lastName);
+            mainObject.put("email", email);
+            mainObject.put("emailVerified", false);
+            mainObject.put("enabled", true);
+        } catch (org.json.JSONException e) {
             e.printStackTrace();
-            return null;
         }
+        return mainObject.toString();
     }
+
+    //creat
 
     //User login--------------------------------------------------------------->>>>>>>>>>>>>>>>>>
     public Mono<String> logUser(String username, String password) {

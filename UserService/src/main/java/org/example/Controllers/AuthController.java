@@ -25,9 +25,12 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        Optional<User> userOptional = userService.createUser(user);
-        return userOptional.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public Mono<ResponseEntity<User>> createUser(@RequestBody User user) {
+        return userService.createUser(user)
+                .map(userOptional -> userOptional
+                        .map(ResponseEntity::ok)
+                        .orElseGet(() -> ResponseEntity.notFound().build())
+                );
     }
 
     @PostMapping("/login")
