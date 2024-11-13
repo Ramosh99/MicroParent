@@ -17,9 +17,9 @@
   <url>http://maven.apache.org</url>
   <modules>
     <module>ProductService</module>
-    <module>APIgateway</module>
     <module>OrderService</module>
     <module>AuthService</module>
+    <module>ApiGateway</module>
   </modules>
 
   <properties>

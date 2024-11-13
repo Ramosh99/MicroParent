@@ -22,6 +22,5 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-gateway-mvc</artifactId>
         </dependency>
-
     </dependencies>
 </project>
