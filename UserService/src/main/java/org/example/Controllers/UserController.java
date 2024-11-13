@@ -1,9 +1,7 @@
-package org.example.Controller;
+package org.example.Controllers;
 
 import lombok.RequiredArgsConstructor;
-import org.example.DTO.SignUpRequest;
 import org.example.Models.User;
-import org.example.Services.AuthService;
 import org.example.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
 
 @RequiredArgsConstructor
 @RestController
@@ -38,7 +35,6 @@ public class UserController {
     // Get User by Email
     @GetMapping("/{email}")
     public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
-        System.out.println("email: "+email);
         Optional<User> userOptional = userService.getUserByEmail(email);
         return userOptional.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }

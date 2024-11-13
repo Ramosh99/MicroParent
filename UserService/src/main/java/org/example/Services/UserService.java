@@ -12,6 +12,8 @@ import java.util.Optional;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private AuthService authService;
 
     // Create User
     public User createUser(User user) {
@@ -27,6 +29,9 @@ public class UserService {
 
     // Get All Users
     public List<User> getAllUsers() {
+        authService.logClient().subscribe(result -> {
+            System.out.println("Result: "+result);
+        });
         return userRepository.findAll();
     }
 
