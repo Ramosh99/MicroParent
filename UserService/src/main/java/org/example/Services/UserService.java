@@ -4,6 +4,7 @@ import org.example.Models.User;
 import org.example.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,8 +17,13 @@ public class UserService {
     private AuthService authService;
 
     // Create User
-    public User createUser(User user) {
-        return userRepository.save(user);
+    public Optional<User> createUser(User user) {
+        final User[] optionalUser = new User[1];
+        authService.addUser(user.getEmail(), user.getPassword(), user.getFirstName(), user.getLastName()).subscribe(
+                result ->
+                        optionalUser[0] = userRepository.save(user)
+        );
+        return Optional.ofNullable(optionalUser[0]);
     }
 
     // Get User by Email
@@ -29,9 +35,6 @@ public class UserService {
 
     // Get All Users
     public List<User> getAllUsers() {
-        authService.logClient().subscribe(result -> {
-            System.out.println("Result: "+result);
-        });
         return userRepository.findAll();
     }
 

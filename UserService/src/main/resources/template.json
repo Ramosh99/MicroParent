@@ -1,0 +1,18 @@
+{
+  "attributes":{
+    "attribute_key": "test_value"
+  },
+  "credentials": [
+    {
+      "temporary": false,
+      "type": "password",
+      "value": "TESTSSWId"
+    }
+  ],
+  "username": "minatoll",
+  "firstName": "mina",
+  "lastName": "toll",
+  "email": "minatoll@gmail.com",
+  "emailVerified": false,
+  "enabled": true
+}
