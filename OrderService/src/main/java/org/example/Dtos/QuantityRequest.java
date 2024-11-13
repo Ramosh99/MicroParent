@@ -1,14 +1,15 @@
-package org.example.Models;
+package org.example.Dtos;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderItem {
-    private int productID;
+public class QuantityRequest {
+    private int id;
     private int quantity;
-    private double price;
 }
