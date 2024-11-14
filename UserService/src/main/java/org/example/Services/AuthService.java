@@ -1,6 +1,7 @@
 package org.example.Services;
 
 import org.example.DTO.UserJson;
+import org.example.Exceptions.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -57,12 +58,13 @@ public class AuthService{
     ){
         return logClient()
                 .flatMap(token -> {
-                    UserJson jsonobj = new UserJson(email, password, firstName, lastName);
+                    UserJson jsonobj = new UserJson(firstName, lastName,email, password);
+
                     return webClient.post()
                             .uri(addUserEndpoint)
                             .header("Authorization", "Bearer " + token)
                             .header("Content-Type", "application/json")
-                            .bodyValue(jsonobj)
+                            .bodyValue(jsonobj.mainObject.toString())
                             .retrieve()
                             .toBodilessEntity()
                             .map(response -> response.getStatusCode() == HttpStatus.CREATED);
@@ -82,8 +84,16 @@ public class AuthService{
                         .with("password", password)
                 )
                 .retrieve()
+                .onStatus(status -> status == HttpStatus.UNAUTHORIZED, response -> Mono.error(new UnauthorizedException("Invalid credentials")))
                 .bodyToMono(Map.class)
-                .map(responseMap -> (String) responseMap.get("access_token"));
+                .map(responseMap -> (String) responseMap.get("access_token"))
+                .onErrorResume(ex -> {
+                    if (ex instanceof UnauthorizedException) {
+                        return Mono.error(ex);  // Pass 401 Unauthorized error to the controller
+                    } else {
+                        return Mono.error(new RuntimeException("Unexpected error")); // Handle other errors
+                    }
+                });
     }
 
 }
