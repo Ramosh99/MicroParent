@@ -1,10 +1,7 @@
 package org.example.Controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.Dtos.OrderDto;
-import org.example.Dtos.OrderRequestDto;
-import org.example.Dtos.ProductStockRequestDto;
-import org.example.Dtos.QuantityRequest;
+import org.example.Dtos.*;
 import org.example.Models.Order;
 import org.example.Services.OrderServices;
 import org.springframework.http.HttpStatus;
@@ -51,4 +48,39 @@ public class OrderController {
     public void changeQuantity(@RequestBody QuantityRequest quantityRequest) {
         orderServices.updateProductQuantity(quantityRequest);
     }
+
+    // update order status via url
+    @PutMapping("/{id}/status")
+    public ResponseEntity<String> updateOrderStatus(@PathVariable String id, @RequestParam String status) {
+        boolean updated = orderServices.updateOrderStatus(id, status);
+        if (updated) {
+            return ResponseEntity.ok("Order status updated successfully.");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
+    // update order status via json body
+    @PutMapping("/update-status")
+    public ResponseEntity<String> updateOrderStatus(@RequestBody UpdateOrderStatusRequest request) {
+        boolean updated = orderServices.updateOrderStatus(request.getId(), request.getStatus());
+        if (updated) {
+            return ResponseEntity.ok("Order status updated successfully.");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // get order details by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Order> getOrderById(@PathVariable String id) {
+        Order order = orderServices.getOrderById(id);
+        if (order != null) {
+            return ResponseEntity.ok(order);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }
