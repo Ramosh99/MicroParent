@@ -1,29 +1,21 @@
 package org.example.Services;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.AllArgsConstructor;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.example.DTO.UserJson;
+import org.example.Exceptions.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.io.IOException;
 import java.util.Map;
-
 
 @Service
 public class AuthService{
 
     private final WebClient webClient;
-    private final ObjectMapper objectMapper;
     private final String clientId;
     private final String clientSecret ;
     private final String logEndpoint;
@@ -32,7 +24,6 @@ public class AuthService{
     @Autowired
     public AuthService(
             WebClient.Builder webClient,
-            ObjectMapper objectMapper,
             @Value("${keycloak.clientId}") String clientId,
             @Value("${keycloak.clientSecret}") String clientSecret,
             @Value("${keycloak.endpoint.log}") String logEndpoint,
@@ -43,9 +34,9 @@ public class AuthService{
         this.clientSecret = clientSecret;
         this.logEndpoint = logEndpoint;
         this.addUserEndpoint = addUserEndpoint;
-        this.objectMapper = objectMapper;
     }
 
+    //Client login (User management authorization)--------------- --------->>>>>>>>>>>>>>>>>>
     public Mono<String> logClient() {
         return webClient.post()
                 .uri(logEndpoint)
@@ -67,51 +58,19 @@ public class AuthService{
     ){
         return logClient()
                 .flatMap(token -> {
-                    String mainObject = createJson(email, password, firstName, lastName);
+                    UserJson jsonobj = new UserJson(firstName, lastName,email, password);
+
                     return webClient.post()
                             .uri(addUserEndpoint)
                             .header("Authorization", "Bearer " + token)
                             .header("Content-Type", "application/json")
-                            .bodyValue(mainObject)
+                            .bodyValue(jsonobj.mainObject.toString())
                             .retrieve()
                             .toBodilessEntity()
                             .map(response -> response.getStatusCode() == HttpStatus.CREATED);
                 });
     }
 
-    //manipulating json object
-    private String createJson(String email, String password, String firstName, String lastName) {
-        JSONObject mainObject = new JSONObject();
-        try {
-            String attributeKey = "attribute_key";
-            String attributeValue = "test_value";
-            boolean temporary = false;
-            // Create JSON for "attributes"
-            JSONObject attributes = new JSONObject();
-            attributes.put(attributeKey, attributeValue);
-            // Create JSON for "credentials" (an array with one object)
-            JSONArray credentials = new JSONArray();
-            JSONObject credentialObject = new JSONObject();
-            credentialObject.put("temporary", temporary);
-            credentialObject.put("type", "password");
-            credentialObject.put("value", password);
-            credentials.put(credentialObject);
-            // Create the main JSON object and assign all properties
-            mainObject.put("attributes", attributes);
-            mainObject.put("credentials", credentials);
-            mainObject.put("username", firstName + lastName);
-            mainObject.put("firstName", firstName);
-            mainObject.put("lastName", lastName);
-            mainObject.put("email", email);
-            mainObject.put("emailVerified", false);
-            mainObject.put("enabled", true);
-        } catch (org.json.JSONException e) {
-            e.printStackTrace();
-        }
-        return mainObject.toString();
-    }
-
-    //creat
 
     //User login--------------------------------------------------------------->>>>>>>>>>>>>>>>>>
     public Mono<String> logUser(String username, String password) {
@@ -125,8 +84,16 @@ public class AuthService{
                         .with("password", password)
                 )
                 .retrieve()
+                .onStatus(status -> status == HttpStatus.UNAUTHORIZED, response -> Mono.error(new UnauthorizedException("Invalid credentials")))
                 .bodyToMono(Map.class)
-                .map(responseMap -> (String) responseMap.get("access_token"));
+                .map(responseMap -> (String) responseMap.get("access_token"))
+                .onErrorResume(ex -> {
+                    if (ex instanceof UnauthorizedException) {
+                        return Mono.error(ex);  // Pass 401 Unauthorized error to the controller
+                    } else {
+                        return Mono.error(new RuntimeException("Unexpected error")); // Handle other errors
+                    }
+                });
     }
 
 }

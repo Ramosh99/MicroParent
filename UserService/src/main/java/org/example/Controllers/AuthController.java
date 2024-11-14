@@ -1,6 +1,7 @@
 package org.example.Controllers;
 
 import org.example.DTO.LoginRequest;
+import org.example.Exceptions.UnauthorizedException;
 import org.example.Models.User;
 import org.example.Services.AuthService;
 import org.example.Services.UserService;
@@ -34,9 +35,16 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public Mono<ResponseEntity<String>> logUser(@RequestBody LoginRequest loginData){
+    public Mono<ResponseEntity<String>> logUser(@RequestBody LoginRequest loginData) {
         return authService.logUser(loginData.username, loginData.password)
                 .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials"));
+                .onErrorResume(ex -> {
+                    if (ex instanceof UnauthorizedException) {
+                        return Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials"));
+                    } else {
+                        return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error"));
+                    }
+                });
     }
+
 }
