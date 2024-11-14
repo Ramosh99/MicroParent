@@ -1,6 +1,7 @@
 package org.example.Services;
 
 import org.example.DTO.UserJson;
+import org.example.Exceptions.AlreadyExistsException;
 import org.example.Exceptions.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,7 +47,11 @@ public class AuthService{
                         .with("grant_type", "client_credentials"))
                 .retrieve()
                 .bodyToMono(Map.class)
-                .map(responseMap -> (String) responseMap.get("access_token"));
+                .map(responseMap -> (String) responseMap.get("access_token"))
+                .onErrorResume(e ->{
+                        return Mono.error(new RuntimeException("Unexpected error", e));
+                    }
+                );
     }
 
     //Add user to key cloak (sign up)----------------------------------->>>>>>>>>>>>>>>>>>>>>
@@ -66,8 +71,16 @@ public class AuthService{
                             .header("Content-Type", "application/json")
                             .bodyValue(jsonobj.mainObject.toString())
                             .retrieve()
+                            .onStatus(status -> status == HttpStatus.CONFLICT, response -> Mono.error(new AlreadyExistsException("User already exists")))
                             .toBodilessEntity()
-                            .map(response -> response.getStatusCode() == HttpStatus.CREATED);
+                            .map(response -> response.getStatusCode() == HttpStatus.CREATED)
+                            .onErrorResume(ex -> {
+                                if (ex instanceof AlreadyExistsException) {
+                                    return Mono.error(ex);
+                                } else {
+                                    return Mono.error(new RuntimeException("Unexpected error"));
+                                }
+                            });
                 });
     }
 
@@ -89,9 +102,9 @@ public class AuthService{
                 .map(responseMap -> (String) responseMap.get("access_token"))
                 .onErrorResume(ex -> {
                     if (ex instanceof UnauthorizedException) {
-                        return Mono.error(ex);  // Pass 401 Unauthorized error to the controller
+                        return Mono.error(ex);
                     } else {
-                        return Mono.error(new RuntimeException("Unexpected error")); // Handle other errors
+                        return Mono.error(new RuntimeException("Unexpected error"));
                     }
                 });
     }

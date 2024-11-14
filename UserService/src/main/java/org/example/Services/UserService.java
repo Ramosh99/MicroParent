@@ -1,5 +1,6 @@
 package org.example.Services;
 
+import org.example.Exceptions.AlreadyExistsException;
 import org.example.Models.User;
 import org.example.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +21,19 @@ public class UserService {
     public Mono<Optional<User>> createUser(User user) {
         return authService.addUser(user.getEmail(), user.getPassword(), user.getFirstName(), user.getLastName())
                 .flatMap(result -> {
-                    User savedUser = userRepository.save(user);
-                    return Mono.just(Optional.of(savedUser));
+                    try {
+                        User savedUser = userRepository.save(user);
+                        return Mono.just(Optional.of(savedUser));
+                    } catch (Exception e) {
+                        return Mono.error(new RuntimeException("Unexpected error", e));
+                    }
+                })
+                .onErrorResume(e -> {
+                    if (e instanceof AlreadyExistsException) {
+                        return Mono.error(e);
+                    } else {
+                        return Mono.error(new RuntimeException("Unexpected error"));
+                    }
                 })
                 .defaultIfEmpty(Optional.empty());
     }
