@@ -1,6 +1,7 @@
 package org.example.Controllers;
 
 import org.example.DTO.LoginRequest;
+import org.example.DTO.SignUpRequest;
 import org.example.Exceptions.AlreadyExistsException;
 import org.example.Exceptions.InvalidFormatException;
 import org.example.Exceptions.UnauthorizedException;
@@ -28,7 +29,7 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/signup")
-    public Mono<ResponseEntity<Object>> createUser(@RequestBody User user) {
+    public Mono<ResponseEntity<Object>> createUser(@RequestBody SignUpRequest user) {
         return userService.createUser(user)
                 .map(userOptional -> userOptional
                         .<ResponseEntity<Object>>map(ResponseEntity::ok)

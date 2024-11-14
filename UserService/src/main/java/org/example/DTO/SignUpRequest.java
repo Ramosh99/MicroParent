@@ -1,10 +1,14 @@
 package org.example.DTO;
 
-import lombok.AllArgsConstructor;
-
-@AllArgsConstructor
 public class SignUpRequest {
-    public String Username;
-    public String Password;
-    public String Role;
+    public String email;
+    public String password;
+    public String phoneNumber;
+    public String firstName;
+    public String lastName;
+    public String addressLine1;
+    public String addressLine2;
+    public String addressLine3;
+    public String profilePhoto;
+    public String role;
 }

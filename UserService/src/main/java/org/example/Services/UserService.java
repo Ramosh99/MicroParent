@@ -1,5 +1,7 @@
 package org.example.Services;
 
+import org.example.DTO.Convertion.DTOtoUser;
+import org.example.DTO.SignUpRequest;
 import org.example.Exceptions.AlreadyExistsException;
 import org.example.Exceptions.InvalidFormatException;
 import org.example.Models.User;
@@ -19,11 +21,11 @@ public class UserService {
     private AuthService authService;
 
     // Create User
-    public Mono<Optional<User>> createUser(User user) {
-        return authService.addUser(user.getEmail(), user.getPassword(), user.getFirstName(), user.getLastName(), user.getRole())
+    public Mono<Optional<User>> createUser(SignUpRequest user) {
+        return authService.addUser(user.email, user.password, user.firstName, user.lastName, user.role)
                 .flatMap(result -> {
                     try {
-                        User savedUser = userRepository.save(user);
+                        User savedUser = userRepository.save(DTOtoUser.convert(user));
                         return Mono.just(Optional.of(savedUser));
                     } catch (Exception e) {
                         return Mono.error(new RuntimeException("Unexpected error", e));
@@ -56,7 +58,6 @@ public class UserService {
     // Update User
     public User updateUser(String email, User userDetails) {
         return userRepository.findById(email).map(user -> {
-            user.setPassword(userDetails.getPassword());
             user.setPhoneNumber(userDetails.getPhoneNumber());
             user.setFirstName(userDetails.getFirstName());
             user.setLastName(userDetails.getLastName());
