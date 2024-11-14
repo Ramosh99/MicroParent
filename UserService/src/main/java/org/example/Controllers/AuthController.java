@@ -2,6 +2,7 @@ package org.example.Controllers;
 
 import org.example.DTO.LoginRequest;
 import org.example.Exceptions.AlreadyExistsException;
+import org.example.Exceptions.InvalidFormatException;
 import org.example.Exceptions.UnauthorizedException;
 import org.example.Models.User;
 import org.example.Services.AuthService;
@@ -36,6 +37,8 @@ public class AuthController {
                 .onErrorResume(e -> {
                     if (e instanceof AlreadyExistsException) {
                         return Mono.just(ResponseEntity.status(HttpStatus.CONFLICT).body("User already exists"));
+                    } else if (e instanceof InvalidFormatException) {
+                        return Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage()));
                     } else {
                         return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error"));
                     }

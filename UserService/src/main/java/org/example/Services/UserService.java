@@ -1,6 +1,7 @@
 package org.example.Services;
 
 import org.example.Exceptions.AlreadyExistsException;
+import org.example.Exceptions.InvalidFormatException;
 import org.example.Models.User;
 import org.example.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,7 @@ public class UserService {
 
     // Create User
     public Mono<Optional<User>> createUser(User user) {
-        return authService.addUser(user.getEmail(), user.getPassword(), user.getFirstName(), user.getLastName())
+        return authService.addUser(user.getEmail(), user.getPassword(), user.getFirstName(), user.getLastName(), user.getRole())
                 .flatMap(result -> {
                     try {
                         User savedUser = userRepository.save(user);
@@ -31,6 +32,8 @@ public class UserService {
                 .onErrorResume(e -> {
                     if (e instanceof AlreadyExistsException) {
                         return Mono.error(e);
+                    } else if (e instanceof InvalidFormatException) {
+                        return Mono.error(new InvalidFormatException(e.getMessage()));
                     } else {
                         return Mono.error(new RuntimeException("Unexpected error"));
                     }
@@ -53,7 +56,6 @@ public class UserService {
     // Update User
     public User updateUser(String email, User userDetails) {
         return userRepository.findById(email).map(user -> {
-            user.setUserName(userDetails.getUserName());
             user.setPassword(userDetails.getPassword());
             user.setPhoneNumber(userDetails.getPhoneNumber());
             user.setFirstName(userDetails.getFirstName());
