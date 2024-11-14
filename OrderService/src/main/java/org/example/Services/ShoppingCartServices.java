@@ -3,6 +3,7 @@ package org.example.Services;
 import lombok.RequiredArgsConstructor;
 import org.example.Dtos.AddToCartDto;
 import org.example.Dtos.GetCartDto;
+import org.example.Dtos.RemoveItemDto;
 import org.example.Models.OrderItem;
 import org.example.Models.ShoppingCart;
 import org.example.Repository.ShoppingCartRepository;
@@ -59,5 +60,22 @@ public class ShoppingCartServices {
     public ShoppingCart getCart(GetCartDto getCartDto) {
         Optional<ShoppingCart> optionalCart = shoppingCartRepository.findByCustomerEmail(getCartDto.getCustomerEmail());
         return optionalCart.orElse(null);
+    }
+
+    public boolean removeItemFromCart(RemoveItemDto removeItemDto) {
+        System.out.println("Email: " + removeItemDto.getCustomerEmail());
+        ShoppingCart shoppingCart;
+        Optional<ShoppingCart> optionalCart = shoppingCartRepository.findByCustomerEmail(removeItemDto.getCustomerEmail());
+        if (optionalCart.isPresent()) {
+            shoppingCart = optionalCart.get();
+            List<OrderItem> orderItems = shoppingCart.getOrderItems();
+            boolean removed = orderItems.removeIf(item -> item.getProductID() == removeItemDto.getItemID());
+
+            if (removed) {
+                shoppingCartRepository.save(shoppingCart);
+                return true;
+            }
+        }
+        return false;
     }
 }
