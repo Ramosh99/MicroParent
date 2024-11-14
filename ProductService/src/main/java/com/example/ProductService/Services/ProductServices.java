@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.Comparator;
 
 @Service
 @Transactional
@@ -63,5 +65,29 @@ public class ProductServices {
             throw new IllegalArgumentException("Insufficient stock for product ID: " + productId);
         }
 
+    }
+
+
+    public List<Product> getProductsByName(String name) {
+        List<Product> allProducts = productRepository.findAll();
+        return allProducts.stream()
+                .filter(product -> product.getName().toLowerCase().contains(name.toLowerCase()))
+                .collect(Collectors.toList());
+    }
+
+    public List<Product> getProductsSortedByPrice(String order) {
+        List<Product> allProducts = productRepository.findAll();
+
+        if ("asc".equalsIgnoreCase(order)) {
+            return allProducts.stream()
+                    .sorted(Comparator.comparing(Product::getPrice))
+                    .collect(Collectors.toList());
+        } else if ("desc".equalsIgnoreCase(order)) {
+            return allProducts.stream()
+                    .sorted(Comparator.comparing(Product::getPrice).reversed())
+                    .collect(Collectors.toList());
+        } else {
+            throw new IllegalArgumentException("Invalid sort order. Use 'asc' or 'desc'.");
+        }
     }
 }
