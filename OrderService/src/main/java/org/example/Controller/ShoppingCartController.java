@@ -19,7 +19,6 @@ public class ShoppingCartController {
     private final ShoppingCartServices shoppingCartServices;
 
     @PostMapping
-    //@ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<String> AddToCart(@RequestBody AddToCartDto addToCartDto) {
         try {
             shoppingCartServices.addToCart(addToCartDto);
@@ -30,7 +29,6 @@ public class ShoppingCartController {
     }
 
     @GetMapping
-    //@ResponseStatus(HttpStatus.FOUND)
     public ResponseEntity<?> GetCart(@RequestBody GetCartDto getCartDto) {
         try {
             ShoppingCart shoppingCart= shoppingCartServices.getCart(getCartDto);
