@@ -2,9 +2,12 @@ package org.example.Controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.Dtos.AddToCartDto;
+import org.example.Dtos.GetCartDto;
+import org.example.Models.ShoppingCart;
 import org.example.Services.ShoppingCartServices;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @RequestMapping("api/v1/cart")
@@ -21,6 +24,8 @@ public class ShoppingCartController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.FOUND)
-    public void GetCart(){}
+    public ShoppingCart GetCart(@RequestBody GetCartDto getCartDto) {
+        return shoppingCartServices.getCart(getCartDto);
+    }
 
 }

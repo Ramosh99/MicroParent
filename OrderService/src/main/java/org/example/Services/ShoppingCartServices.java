@@ -2,6 +2,7 @@ package org.example.Services;
 
 import lombok.RequiredArgsConstructor;
 import org.example.Dtos.AddToCartDto;
+import org.example.Dtos.GetCartDto;
 import org.example.Models.OrderItem;
 import org.example.Models.ShoppingCart;
 import org.example.Repository.ShoppingCartRepository;
@@ -53,5 +54,10 @@ public class ShoppingCartServices {
                     .build();
         }
         shoppingCartRepository.save(shoppingCart);
+    }
+
+    public ShoppingCart getCart(GetCartDto getCartDto) {
+        Optional<ShoppingCart> optionalCart = shoppingCartRepository.findByCustomerEmail(getCartDto.getCustomerEmail());
+        return optionalCart.orElse(null);
     }
 }
