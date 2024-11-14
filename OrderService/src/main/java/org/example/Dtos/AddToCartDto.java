@@ -1,4 +1,4 @@
-package org.example.Models;
+package org.example.Dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderItem {
+public class AddToCartDto {
+    private String CustomerEmail;
     private int productID;
     private int quantity;
     private double price;

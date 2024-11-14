@@ -1,0 +1,57 @@
+package org.example.Services;
+
+import lombok.RequiredArgsConstructor;
+import org.example.Dtos.AddToCartDto;
+import org.example.Models.OrderItem;
+import org.example.Models.ShoppingCart;
+import org.example.Repository.ShoppingCartRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+public class ShoppingCartServices {
+    final ShoppingCartRepository shoppingCartRepository;
+
+    public void addToCart(AddToCartDto addToCartDto) {
+        Optional<ShoppingCart> optionalCart = shoppingCartRepository.findByCustomerEmail(addToCartDto.getCustomerEmail());
+        ShoppingCart shoppingCart;
+        if (optionalCart.isPresent()) {
+            shoppingCart = optionalCart.get();
+
+            OrderItem newItem = OrderItem.builder()
+                    .productID(addToCartDto.getProductID())
+                    .quantity(addToCartDto.getQuantity())
+                    .price(addToCartDto.getPrice())
+                    .build();
+
+            List<OrderItem> existingItems = shoppingCart.getOrderItems();
+            if (existingItems == null) {
+                existingItems = new ArrayList<>();
+            }
+
+            existingItems.add(newItem);
+            shoppingCart.setOrderItems(existingItems);
+
+        }
+        else {
+            OrderItem newItem = OrderItem.builder()
+                    .productID(addToCartDto.getProductID())
+                    .quantity(addToCartDto.getQuantity())
+                    .price(addToCartDto.getPrice())
+                    .build();
+
+            List<OrderItem> items = new ArrayList<>();
+            items.add(newItem);
+
+            shoppingCart = ShoppingCart.builder()
+                    .customerEmail(addToCartDto.getCustomerEmail())
+                    .orderItems(items)
+                    .build();
+        }
+        shoppingCartRepository.save(shoppingCart);
+    }
+}
