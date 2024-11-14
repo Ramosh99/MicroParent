@@ -6,12 +6,15 @@ import com.example.ProductService.Models.Product;
 import com.example.ProductService.Repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -30,6 +33,7 @@ public class ProductServices {
         product.setImageUrl(productRequestDto.getImageUrl());
         product.setCategory(productRequestDto.getCategory());
         product.setSellerId(productRequestDto.getSellerId());
+        product.setPopularity(productRequestDto.getPopularity());
         productRepository.save(product);
     }
 
@@ -39,6 +43,14 @@ public class ProductServices {
 
     public Product getProductById(int id) {
         return productRepository.findById(id).orElseThrow(NoSuchElementException::new);
+    }
+
+    public List<Product> getProductsByCategory(String category) {
+        List<Product> products = productRepository.findByCategory(category);
+        if(products.isEmpty()) {
+            throw new NoSuchElementException();
+        }
+        return products;
     }
 
     public void deleteProductById(int id) {
@@ -63,5 +75,9 @@ public class ProductServices {
             throw new IllegalArgumentException("Insufficient stock for product ID: " + productId);
         }
 
+    }
+
+    public List<Product> sortedByPopularity(List<Product> list) {
+        return list.stream().sorted(Comparator.comparing(Product::getPopularity).reversed()).collect(Collectors.toList());
     }
 }

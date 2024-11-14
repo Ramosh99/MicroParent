@@ -24,14 +24,14 @@ public class UserJson {
             credentials.put(credentialObject);
 
             // Create the main JSON object and assign all properties
-            mainObject.put("attributes", attributes);
-            mainObject.put("credentials", credentials);
-            mainObject.put("username", firstName + lastName);
-            mainObject.put("firstName", firstName);
-            mainObject.put("lastName", lastName);
-            mainObject.put("email", email);
-            mainObject.put("emailVerified", false);
-            mainObject.put("enabled", true);
+            this.mainObject.put("attributes", attributes);
+            this.mainObject.put("credentials", credentials);
+            this.mainObject.put("username", firstName + lastName);
+            this.mainObject.put("firstName", firstName);
+            this.mainObject.put("lastName", lastName);
+            this.mainObject.put("email", email);
+            this.mainObject.put("emailVerified", false);
+            this.mainObject.put("enabled", true);
         } catch (org.json.JSONException e) {
             e.printStackTrace();
         }
