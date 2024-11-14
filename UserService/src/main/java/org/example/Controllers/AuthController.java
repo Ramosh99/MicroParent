@@ -1,6 +1,9 @@
 package org.example.Controllers;
 
 import org.example.DTO.LoginRequest;
+import org.example.DTO.SignUpRequest;
+import org.example.Exceptions.AlreadyExistsException;
+import org.example.Exceptions.InvalidFormatException;
 import org.example.Exceptions.UnauthorizedException;
 import org.example.Models.User;
 import org.example.Services.AuthService;
@@ -26,13 +29,23 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/signup")
-    public Mono<ResponseEntity<User>> createUser(@RequestBody User user) {
+    public Mono<ResponseEntity<Object>> createUser(@RequestBody SignUpRequest user) {
         return userService.createUser(user)
                 .map(userOptional -> userOptional
-                        .map(ResponseEntity::ok)
-                        .orElseGet(() -> ResponseEntity.notFound().build())
-                );
+                        .<ResponseEntity<Object>>map(ResponseEntity::ok)
+                        .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found"))
+                )
+                .onErrorResume(e -> {
+                    if (e instanceof AlreadyExistsException) {
+                        return Mono.just(ResponseEntity.status(HttpStatus.CONFLICT).body("User already exists"));
+                    } else if (e instanceof InvalidFormatException) {
+                        return Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage()));
+                    } else {
+                        return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error"));
+                    }
+                });
     }
+
 
     @PostMapping("/login")
     public Mono<ResponseEntity<String>> logUser(@RequestBody LoginRequest loginData) {
