@@ -57,12 +57,12 @@ public class AuthService{
     ){
         return logClient()
                 .flatMap(token -> {
-                    UserJson jsonobj = new UserJson(email, password, firstName, lastName);
+                    UserJson jsonobj = new UserJson(firstName, lastName,email, password);
                     return webClient.post()
                             .uri(addUserEndpoint)
                             .header("Authorization", "Bearer " + token)
                             .header("Content-Type", "application/json")
-                            .bodyValue(jsonobj)
+                            .bodyValue(jsonobj.mainObject.toString())
                             .retrieve()
                             .toBodilessEntity()
                             .map(response -> response.getStatusCode() == HttpStatus.CREATED);
