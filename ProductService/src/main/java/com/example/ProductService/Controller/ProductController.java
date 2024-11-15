@@ -26,8 +26,12 @@ public class ProductController {
     }
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<Product> getAllProducts(){
-        return productServices.getAllProducts();
+    public List<Product> getAllProducts(@RequestParam String user){
+        List<Product> result = productServices.getAllProducts();
+        if(user.equals("customer")){
+            return productServices.sortedByPopularity(result);
+        }
+        return result;
     }
 
     @GetMapping("/{id}")
@@ -36,10 +40,26 @@ public class ProductController {
         return productServices.getProductById(id);
     }
 
+    @GetMapping("/category/{category}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Product> getProductsByCategory(@PathVariable String category, @RequestParam String user) {
+        List<Product> result = productServices.getProductsByCategory(category);
+        if(user.equals("customer")) {
+            return productServices.sortedByPopularity(result);
+        }
+        return result;
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public void deleteProduct(@PathVariable int id){
         productServices.deleteProductById(id);
+    }
+
+    @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public void updateProduct(@PathVariable int id, @RequestBody ProductRequestDto productRequest){
+         productServices.updateProductDetails(id, productRequest);
     }
 
     @PostMapping("/availability")
@@ -53,4 +73,16 @@ public class ProductController {
     public void changeProductQuantity(@RequestBody QuantityRequest quantityRequest) {
         productServices.updateProductQuantity(quantityRequest.getId(), quantityRequest.getQuantity());
     }
+
+
+    @GetMapping("/search")
+    public List<Product> getProductsByName(@RequestParam String name) {
+        return productServices.getProductsByName(name);
+    }
+
+    @GetMapping("/sort")
+    public List<Product> getProductsSorted(@RequestParam String order) {
+        return productServices.getProductsSortedByPrice(order);
+    }
+
 }

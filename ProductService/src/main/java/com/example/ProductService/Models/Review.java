@@ -12,16 +12,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class Product {
+
+public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
-    private double price;
-    private int quantity;
-    private String description;
-    private String imageUrl;
-    private String category;
-    private String sellerId;
-    private int popularity;
+    private int productId;
+    private String comment;
+    private String reply;
+    private String reviewImageUrl;
+    private int rating;
 }
