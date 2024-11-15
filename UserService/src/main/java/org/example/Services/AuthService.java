@@ -19,7 +19,8 @@ import java.util.Map;
 @Service
 public class AuthService{
 
-    private final WebClient webClient;private final String clientId;
+    private final WebClient webClient;
+    private final String clientId;
     private final String clientIdNo;
     private final String clientSecret ;
     private final String logEndpoint;
@@ -75,7 +76,7 @@ public class AuthService{
             String role
     ){
         //Validation =================================
-        if(role.isEmpty()||!(role.equals("admin")||role.equals("seller")||role.equals("buyer"))){
+        if(role.isEmpty()||!(role.equals("admin")||role.equals("seller")||role.equals("buyer")||role.equals("courier"))){
             return Mono.error(new InvalidFormatException("Invalid role"));
         }
 
