@@ -64,4 +64,17 @@ public class ProductServices {
         }
 
     }
+
+    public void updateProductDetails(int productId ,ProductRequestDto productRequestDto) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new NoSuchElementException("Product not found with ID: " + productId));
+        product.setName(productRequestDto.getName());
+        product.setPrice(productRequestDto.getPrice());
+        product.setQuantity(productRequestDto.getQuantity());
+        product.setDescription(productRequestDto.getDescription());
+        product.setImageUrl(productRequestDto.getImageUrl());
+        product.setCategory(productRequestDto.getCategory());
+        product.setSellerId(productRequestDto.getSellerId());
+        productRepository.save(product);
+    }
 }

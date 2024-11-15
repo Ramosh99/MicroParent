@@ -1,6 +1,8 @@
 package com.example.ProductService.Controller;
 
+import com.example.ProductService.Dtos.ReviewReplyDto;
 import com.example.ProductService.Dtos.ReviewRequest;
+import com.example.ProductService.Dtos.ReviewUpdateDto;
 import com.example.ProductService.Models.Review;
 import com.example.ProductService.Services.ReviewService;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,18 @@ public class ReviewController {
     @ResponseStatus(HttpStatus.OK)
     public List<Review> getReviewsByProductId(@PathVariable("productId") int productId) {
         return reviewService.getReviewsByProductId(productId);
+    }
+
+    @PutMapping("update/reply")
+    @ResponseStatus(HttpStatus.OK)
+    public void replyReview(@RequestBody ReviewReplyDto review) {
+        reviewService.addReply(review);
+    }
+
+    @PutMapping("update/comment")
+    @ResponseStatus(HttpStatus.OK)
+    public void updateReview(@RequestBody ReviewUpdateDto review) {
+        reviewService.updateReview(review);
     }
 
 }
