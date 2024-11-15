@@ -1,4 +1,4 @@
-package org.example.Models;
+package com.example.ProductService.Dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderItem {
-    private int productID;
-    private int quantity;
-    private double price;
+public class ReviewUpdateDto {
+    private int id;
+    private String comment;
 }
