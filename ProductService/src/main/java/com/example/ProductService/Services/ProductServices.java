@@ -71,6 +71,8 @@ public class ProductServices {
                 throw new IllegalArgumentException("Insufficient stock for product ID: " + productId);
             }
             product.setQuantity(updatedQuantity);
+            // increment the popularity when order a product
+            product.setPopularity(product.getPopularity() + 1);
             productRepository.save(product);
         }else {
             throw new IllegalArgumentException("Insufficient stock for product ID: " + productId);
