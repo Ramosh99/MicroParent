@@ -6,12 +6,16 @@ import com.example.ProductService.Models.Product;
 import com.example.ProductService.Repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 
 @Service
 @Transactional
@@ -30,6 +34,7 @@ public class ProductServices {
         product.setImageUrl(productRequestDto.getImageUrl());
         product.setCategory(productRequestDto.getCategory());
         product.setSellerId(productRequestDto.getSellerId());
+        product.setPopularity(productRequestDto.getPopularity());
         productRepository.save(product);
     }
 
@@ -39,6 +44,14 @@ public class ProductServices {
 
     public Product getProductById(int id) {
         return productRepository.findById(id).orElseThrow(NoSuchElementException::new);
+    }
+
+    public List<Product> getProductsByCategory(String category) {
+        List<Product> products = productRepository.findByCategory(category);
+        if(products.isEmpty()) {
+            throw new NoSuchElementException();
+        }
+        return products;
     }
 
     public void deleteProductById(int id) {
@@ -64,7 +77,6 @@ public class ProductServices {
         }
 
     }
-
     public void updateProductDetails(int productId ,ProductRequestDto productRequestDto) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NoSuchElementException("Product not found with ID: " + productId));
@@ -76,5 +88,34 @@ public class ProductServices {
         product.setCategory(productRequestDto.getCategory());
         product.setSellerId(productRequestDto.getSellerId());
         productRepository.save(product);
+}
+
+    public List<Product> sortedByPopularity(List<Product> list) {
+        return list.stream().sorted(Comparator.comparing(Product::getPopularity).reversed()).collect(Collectors.toList());
+    }
+
+    public List<Product> getProductsByName(String name) {
+        List<Product> allProducts = productRepository.findAll();
+        return allProducts.stream()
+                .filter(product -> product.getName().toLowerCase().contains(name.toLowerCase()))
+                .collect(Collectors.toList());
+    }
+
+    public List<Product> getProductsSortedByPrice(String order) {
+        List<Product> allProducts = productRepository.findAll();
+
+        if ("asc".equalsIgnoreCase(order)) {
+            return allProducts.stream()
+                    .sorted(Comparator.comparing(Product::getPrice))
+                    .collect(Collectors.toList());
+        } else if ("desc".equalsIgnoreCase(order)) {
+            return allProducts.stream()
+                    .sorted(Comparator.comparing(Product::getPrice).reversed())
+                    .collect(Collectors.toList());
+        } else {
+            throw new IllegalArgumentException("Invalid sort order. Use 'asc' or 'desc'.");
+        }
+
+
     }
 }
