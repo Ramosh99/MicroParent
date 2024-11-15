@@ -1,18 +1,15 @@
 package org.example.Services;
 
 import lombok.RequiredArgsConstructor;
-import org.example.Dtos.OrderDto;
-import org.example.Dtos.OrderRequestDto;
-import org.example.Dtos.ProductStockRequestDto;
-import org.example.Dtos.QuantityRequest;
+import org.example.Dtos.*;
 import org.example.Models.Order;
 import org.example.Models.OrderItem;
 import org.example.Repository.OrderRepository;
 import org.example.client.ProductClient;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import org.example.client.Product;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +20,7 @@ import java.util.stream.Collectors;
 public class OrderServices {
     private final OrderRepository orderRepository;
     private final ProductClient productClient;
+
 
     //post order
     public void createOrder(OrderDto orderRequest) {
@@ -98,6 +96,35 @@ public class OrderServices {
 
     public Order getOrderById(String orderId) {
         return orderRepository.findById(orderId).orElse(null);
+    }
+
+    // Fetch orders by user ID
+    public List<Order> getOrdersByUserId(String userId) {
+        return orderRepository.findAll().stream()
+                .filter(order -> order.getUserId().equals(userId))
+                .collect(Collectors.toList());
+    }
+
+    // Fetch full order details by order ID including product details
+    public OrderDetailsDto getFullOrderById(String orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
+
+        // Fetch detailed product information for each order item
+        List<OrderItemDto> orderItemDtos = order.getItems().stream().map(orderItem -> {
+            Product product = productClient.getProductById(orderItem.getProductID());
+            return new OrderItemDto(orderItem.getProductID(), product.getName(), product.getDescription(),
+                    orderItem.getQuantity(), product.getPrice(), product.getImageUrl(), product.getCategory());
+        }).collect(Collectors.toList());
+
+        // Build and return detailed order information
+        return OrderDetailsDto.builder()
+                .id(order.getId())
+                .userId(order.getUserId())
+                .dateCreated(order.getDateCreated())
+                .status(order.getStatus())
+                .items(orderItemDtos)
+                .build();
     }
 
 }

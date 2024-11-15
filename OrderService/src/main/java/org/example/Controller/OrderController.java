@@ -83,4 +83,21 @@ public class OrderController {
         }
     }
 
+    // Get orders by user ID
+    @GetMapping("/getOrders/{userId}")
+    public ResponseEntity<List<Order>> getOrdersByUserId(@PathVariable String userId) {
+        List<Order> orders = orderServices.getOrdersByUserId(userId);
+        if (orders.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(orders);
+    }
+
+    // Get full order information by order ID (including product details)
+    @GetMapping("/getOrderDetails/{orderId}")
+    public ResponseEntity<OrderDetailsDto> getFullOrderDetails(@PathVariable String orderId) {
+        OrderDetailsDto orderDetails = orderServices.getFullOrderById(orderId);
+        return ResponseEntity.ok(orderDetails);
+    }
+
 }
