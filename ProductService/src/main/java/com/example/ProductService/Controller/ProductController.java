@@ -26,14 +26,28 @@ public class ProductController {
     }
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<Product> getAllProducts(){
-        return productServices.getAllProducts();
+    public List<Product> getAllProducts(@RequestParam String user){
+        List<Product> result = productServices.getAllProducts();
+        if(user.equals("customer")){
+            return productServices.sortedByPopularity(result);
+        }
+        return result;
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Product getProduct(@PathVariable int id){
         return productServices.getProductById(id);
+    }
+
+    @GetMapping("/category/{category}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Product> getProductsByCategory(@PathVariable String category, @RequestParam String user) {
+        List<Product> result = productServices.getProductsByCategory(category);
+        if(user.equals("customer")) {
+            return productServices.sortedByPopularity(result);
+        }
+        return result;
     }
 
     @DeleteMapping("/{id}")
