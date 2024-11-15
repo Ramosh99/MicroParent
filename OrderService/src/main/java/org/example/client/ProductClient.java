@@ -15,4 +15,7 @@ public interface ProductClient {
 
     @RequestMapping(method = RequestMethod.POST, value = "api/v1/product/quantity/update")
     void updateQuantity(@RequestBody QuantityRequest quantityRequest);
+
+    @RequestMapping(method = RequestMethod.GET, value = "api/v1/product/{id}")
+    Product getProductById(@PathVariable int id);
 }
