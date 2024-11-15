@@ -16,6 +16,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+
 @Service
 @Transactional
 @Slf4j
@@ -77,7 +78,32 @@ public class ProductServices {
 
     }
 
+
     public List<Product> sortedByPopularity(List<Product> list) {
         return list.stream().sorted(Comparator.comparing(Product::getPopularity).reversed()).collect(Collectors.toList());
+    }
+
+    public List<Product> getProductsByName(String name) {
+        List<Product> allProducts = productRepository.findAll();
+        return allProducts.stream()
+                .filter(product -> product.getName().toLowerCase().contains(name.toLowerCase()))
+                .collect(Collectors.toList());
+    }
+
+    public List<Product> getProductsSortedByPrice(String order) {
+        List<Product> allProducts = productRepository.findAll();
+
+        if ("asc".equalsIgnoreCase(order)) {
+            return allProducts.stream()
+                    .sorted(Comparator.comparing(Product::getPrice))
+                    .collect(Collectors.toList());
+        } else if ("desc".equalsIgnoreCase(order)) {
+            return allProducts.stream()
+                    .sorted(Comparator.comparing(Product::getPrice).reversed())
+                    .collect(Collectors.toList());
+        } else {
+            throw new IllegalArgumentException("Invalid sort order. Use 'asc' or 'desc'.");
+        }
+
     }
 }

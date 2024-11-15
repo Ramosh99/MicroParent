@@ -67,4 +67,16 @@ public class ProductController {
     public void changeProductQuantity(@RequestBody QuantityRequest quantityRequest) {
         productServices.updateProductQuantity(quantityRequest.getId(), quantityRequest.getQuantity());
     }
+
+
+    @GetMapping("/search")
+    public List<Product> getProductsByName(@RequestParam String name) {
+        return productServices.getProductsByName(name);
+    }
+
+    @GetMapping("/sort")
+    public List<Product> getProductsSorted(@RequestParam String order) {
+        return productServices.getProductsSortedByPrice(order);
+    }
+
 }
