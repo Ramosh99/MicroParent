@@ -9,11 +9,13 @@ import org.example.Models.Order;
 import org.example.Models.OrderItem;
 import org.example.Repository.OrderRepository;
 import org.example.client.ProductClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -82,4 +84,20 @@ public class OrderServices {
     public void updateProductQuantity(QuantityRequest quantityRequest) {
         productClient.updateQuantity(quantityRequest);
     }
+
+    public boolean updateOrderStatus(String orderId, String status) {
+        Optional<Order> orderOptional = orderRepository.findById(orderId);
+        if (orderOptional.isPresent()) {
+            Order order = orderOptional.get();
+            order.setStatus(status); // Set the new status
+            orderRepository.save(order); // Save the updated order
+            return true;
+        }
+        return false;
+    }
+
+    public Order getOrderById(String orderId) {
+        return orderRepository.findById(orderId).orElse(null);
+    }
+
 }
