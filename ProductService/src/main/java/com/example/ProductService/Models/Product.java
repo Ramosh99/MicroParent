@@ -23,4 +23,5 @@ public class Product {
     private String imageUrl;
     private String category;
     private String sellerId;
+    private int popularity;
 }
