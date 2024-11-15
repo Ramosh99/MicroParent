@@ -77,7 +77,18 @@ public class ProductServices {
         }
 
     }
-
+    public void updateProductDetails(int productId ,ProductRequestDto productRequestDto) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new NoSuchElementException("Product not found with ID: " + productId));
+        product.setName(productRequestDto.getName());
+        product.setPrice(productRequestDto.getPrice());
+        product.setQuantity(productRequestDto.getQuantity());
+        product.setDescription(productRequestDto.getDescription());
+        product.setImageUrl(productRequestDto.getImageUrl());
+        product.setCategory(productRequestDto.getCategory());
+        product.setSellerId(productRequestDto.getSellerId());
+        productRepository.save(product);
+}
 
     public List<Product> sortedByPopularity(List<Product> list) {
         return list.stream().sorted(Comparator.comparing(Product::getPopularity).reversed()).collect(Collectors.toList());
@@ -104,6 +115,7 @@ public class ProductServices {
         } else {
             throw new IllegalArgumentException("Invalid sort order. Use 'asc' or 'desc'.");
         }
+
 
     }
 }

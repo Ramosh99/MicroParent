@@ -56,6 +56,12 @@ public class ProductController {
         productServices.deleteProductById(id);
     }
 
+    @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public void updateProduct(@PathVariable int id, @RequestBody ProductRequestDto productRequest){
+         productServices.updateProductDetails(id, productRequest);
+    }
+
     @PostMapping("/availability")
     @ResponseStatus(HttpStatus.OK)
     public boolean isProductAvailable(@RequestBody AvailableRequest productRequest){
