@@ -4,5 +4,5 @@ import lombok.AllArgsConstructor;
 
 public class LoginRequest {
     public String password;
-    public String username;
+    public String email;
 }

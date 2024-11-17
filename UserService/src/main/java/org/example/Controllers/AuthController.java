@@ -49,7 +49,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public Mono<ResponseEntity<String>> logUser(@RequestBody LoginRequest loginData) {
-        return authService.logUser(loginData.username, loginData.password)
+        return authService.logUser(loginData.email, loginData.password)
                 .map(ResponseEntity::ok)
                 .onErrorResume(ex -> {
                     if (ex instanceof UnauthorizedException) {
