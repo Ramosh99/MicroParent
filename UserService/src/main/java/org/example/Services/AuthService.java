@@ -139,14 +139,14 @@ public class AuthService{
 
 
     //User login--------------------------------------------------------------->>>>>>>>>>>>>>>>>>
-    public Mono<String> logUser(String username, String password) {
+    public Mono<String> logUser(String email, String password) {
         return webClient.post()
                 .uri(logEndpoint)
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .body(BodyInserters.fromFormData("client_id", clientId)
                         .with("client_secret", clientSecret)
                         .with("grant_type", "password")
-                        .with("username", username)
+                        .with("username", email)
                         .with("password", password)
                 )
                 .retrieve()
@@ -157,6 +157,7 @@ public class AuthService{
                     if (ex instanceof UnauthorizedException) {
                         return Mono.error(ex);
                     } else {
+                        System.out.println(ex.getMessage());
                         return Mono.error(new RuntimeException("Unexpected error"));
                     }
                 });
