@@ -63,7 +63,7 @@ public class AuthController {
     // Update password
     @PutMapping("/password/{email}")
     public Mono<ResponseEntity<String>> updatePassword(@PathVariable String email) {
-        return authService.getUserId(email)
+        return authService.setUpdatePassword(email)
                 .map(ResponseEntity::ok)
                 .onErrorResume(ex -> {
                     if (ex instanceof NoUserException) {

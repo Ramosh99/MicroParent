@@ -164,49 +164,52 @@ public class AuthService{
 
     //Update password--------------------------------------------------------------->>>>>>>>>>>>>>>>>>
 
-    public Mono<String> setUpdatePassword(String id,String token){
-        return webClient.put()
-                .uri(userEndpoint+"/"+id+"/execute-actions-email")
-                .header("Authorization", "Bearer " + token)
-                .retrieve()
-                .onStatus(status -> status != HttpStatus.NO_CONTENT, response -> Mono.error(new RuntimeException("Unexpected error")))
-                .bodyToMono(Map.class)
-                .map(responseMap -> (String) "Link sent to email")
-                .onErrorResume(ex -> {
-                    System.out.println(ex.getMessage());
-                    return Mono.error(new RuntimeException("Unexpected error"));
-                });
+    public Mono<String> setUpdatePassword(String email){
+        return getUserId(email)
+                .flatMap(result->
+                        webClient.put()
+                        .uri(userEndpoint+"/"+result[1]+"/execute-actions-email")
+                        .header("Authorization", "Bearer " + result[0])
+                        .header("Content-Type", "application/json")
+                        .body(BodyInserters.fromValue("[\"UPDATE_PASSWORD\"]"))
+                        .retrieve()
+                        .onStatus(status -> status != HttpStatus.NO_CONTENT, response -> Mono.error(new RuntimeException("Unexpected error")))
+                        .bodyToMono(Map.class)
+                        .map(responseMap -> "Password updated")
+                        .onErrorResume(ex -> {
+                            return Mono.error(new RuntimeException("Unexpected error"));
+                        }));
+
     }
 
-    public Mono<String[]> getUserId(String email){
+    private Mono<String[]> getUserId(String email){
         return logClient()
-                .flatMap(token -> {
-                    return webClient.get()
-                            .uri(userEndpoint+"?email="+email)
-                            .header("Authorization", "Bearer " + token)
-                            .retrieve()
-                            .bodyToMono(new ParameterizedTypeReference<List<Map<String, Object>>>() {})
-                            .map(responseMap -> {
-                                if (responseMap != null) {
-                                    String[] ar= new String[2];
-                                    List<Map<String, Object>> userList = (List<Map<String, Object>>) responseMap;
-                                    if (!userList.isEmpty()) {
-                                        ar[1]= userList.get(0).get("id").toString();
-                                        ar[0]=token;
-                                        return ar;
-                                    }
-                                    throw new NoUserException("No user exists");
+                .flatMap(token ->
+                        webClient.get()
+                        .uri(userEndpoint+"?email="+email)
+                        .header("Authorization", "Bearer " + token)
+                        .retrieve()
+                        .bodyToMono(new ParameterizedTypeReference<List<Map<String, Object>>>() {})
+                        .map(responseMap -> {
+                            if (responseMap != null) {
+                                String[] ar= new String[2];
+                                List<Map<String, Object>> userList = (List<Map<String, Object>>) responseMap;
+                                if (!userList.isEmpty()) {
+                                    ar[1]= userList.get(0).get("id").toString();
+                                    ar[0]=token;
+                                    return ar;
                                 }
-                                throw new RuntimeException("Unexpected error");
-                            })
-                            .onErrorResume(ex -> {
-                                if (ex instanceof NoUserException) {
-                                    return Mono.error(ex);
-                                } else {
-                                    return Mono.error(new RuntimeException("Unexpected error"));
-                                }
-                            });
-                });
+                                throw new NoUserException("No user exists");
+                            }
+                            throw new RuntimeException("Unexpected error");
+                        })
+                        .onErrorResume(ex -> {
+                            if (ex instanceof NoUserException) {
+                                return Mono.error(ex);
+                            } else {
+                                return Mono.error(new RuntimeException("Unexpected error"));
+                            }
+                        }));
     }
 
 }
