@@ -5,6 +5,7 @@ import org.example.DTO.LoginRequest;
 import org.example.DTO.SignUpRequest;
 import org.example.Exceptions.AlreadyExistsException;
 import org.example.Exceptions.InvalidFormatException;
+import org.example.Exceptions.NoUserException;
 import org.example.Exceptions.UnauthorizedException;
 import org.example.Models.User;
 import org.example.Services.AuthService;
@@ -59,6 +60,20 @@ public class AuthController {
     }
 
 
+    // Update password
+    @PutMapping("/password/{email}")
+    public Mono<ResponseEntity<String>> updatePassword(@PathVariable String email) {
+        return authService.getUserId(email)
+                .map(ResponseEntity::ok)
+                .onErrorResume(ex -> {
+                    if (ex instanceof NoUserException) {
+                        return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body("No user exists"));
+                    } else {
+                        return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error"));
+                    }
+                });
+    }
+
     // Update User
     @PutMapping("/{email}")
     public ResponseEntity<User> updateUser(@PathVariable String email, @RequestBody EditUser userDetails) {
@@ -70,5 +85,7 @@ public class AuthController {
             return ResponseEntity.notFound().build();
         }
     }
+
+
 
 }
