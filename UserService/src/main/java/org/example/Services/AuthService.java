@@ -1,12 +1,16 @@
 package org.example.Services;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.DTO.RoleJson;
 import org.example.DTO.UserJson;
 import org.example.Exceptions.AlreadyExistsException;
 import org.example.Exceptions.InvalidFormatException;
+import org.example.Exceptions.NoUserException;
 import org.example.Exceptions.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -14,6 +18,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -24,9 +29,7 @@ public class AuthService{
     private final String clientIdNo;
     private final String clientSecret ;
     private final String logEndpoint;
-    private final String addUserEndpoint;
-    private final String roleAssignEndpoint1;
-    private final String roleAssignEndpoint2;
+    private final String userEndpoint;
 
     @Autowired
     public AuthService(
@@ -34,10 +37,8 @@ public class AuthService{
             @Value("${keycloak.clientId}") String clientId,
             @Value("${keycloak.clientIdNo}") String clientIdNo,
             @Value("${keycloak.clientSecret}") String clientSecret,
-            @Value("${keycloak.endpoint.log}") String logEndpoint,
-            @Value("${keycloak.endpoint.addUser}") String addUserEndpoint,
-            @Value("${keycloak.endpoint.assignRole1}") String roleAssignEndpoint1,
-            @Value("${keycloak.endpoint.assignRole2}") String roleAssignEndpoint2
+            @Value("${keycloak.endpoint.user}") String userEndpoint,
+            @Value("${keycloak.endpoint.log}") String logEndpoint
 
     ) {
         this.webClient = webClient.build();
@@ -45,9 +46,7 @@ public class AuthService{
         this.clientIdNo = clientIdNo;
         this.clientSecret = clientSecret;
         this.logEndpoint = logEndpoint;
-        this.addUserEndpoint = addUserEndpoint;
-        this.roleAssignEndpoint1 = roleAssignEndpoint1;
-        this.roleAssignEndpoint2 = roleAssignEndpoint2;
+        this.userEndpoint = userEndpoint;
     }
 
     //Client login (User management authorization)--------------- --------->>>>>>>>>>>>>>>>>>
@@ -85,7 +84,7 @@ public class AuthService{
                 .flatMap(token -> {
                     UserJson jsonobj = new UserJson(firstName, lastName,email, password);
                     return webClient.post()
-                            .uri(addUserEndpoint)
+                            .uri(userEndpoint)
                             .header("Authorization", "Bearer " + token)
                             .header("Content-Type", "application/json")
                             .bodyValue(jsonobj.mainObject.toString())
@@ -123,7 +122,7 @@ public class AuthService{
         RoleJson jsonobj = new RoleJson(role);
         System.out.println(jsonobj.mainObject.toString());
         return webClient.post()
-                .uri(roleAssignEndpoint1+userIdNo+roleAssignEndpoint2+clientIdNo)
+                .uri(userEndpoint+"/role-mappings/clients/"+clientIdNo)
                 .header("Authorization", "Bearer " + token)
                 .header("Content-Type", "application/json")
                 .bodyValue(jsonobj.mainObject.toString())
@@ -161,6 +160,56 @@ public class AuthService{
                         return Mono.error(new RuntimeException("Unexpected error"));
                     }
                 });
+    }
+
+    //Update password--------------------------------------------------------------->>>>>>>>>>>>>>>>>>
+
+    public Mono<String> setUpdatePassword(String email){
+        return getUserId(email)
+                .flatMap(result->
+                        webClient.put()
+                        .uri(userEndpoint+"/"+result[1]+"/execute-actions-email")
+                        .header("Authorization", "Bearer " + result[0])
+                        .header("Content-Type", "application/json")
+                        .body(BodyInserters.fromValue("[\"UPDATE_PASSWORD\"]"))
+                        .retrieve()
+                        .onStatus(status -> status != HttpStatus.NO_CONTENT, response -> Mono.error(new RuntimeException("Unexpected error")))
+                        .bodyToMono(Map.class)
+                        .map(responseMap -> "Password updated")
+                        .onErrorResume(ex -> {
+                            return Mono.error(new RuntimeException("Unexpected error"));
+                        }));
+
+    }
+
+    private Mono<String[]> getUserId(String email){
+        return logClient()
+                .flatMap(token ->
+                        webClient.get()
+                        .uri(userEndpoint+"?email="+email)
+                        .header("Authorization", "Bearer " + token)
+                        .retrieve()
+                        .bodyToMono(new ParameterizedTypeReference<List<Map<String, Object>>>() {})
+                        .map(responseMap -> {
+                            if (responseMap != null) {
+                                String[] ar= new String[2];
+                                List<Map<String, Object>> userList = (List<Map<String, Object>>) responseMap;
+                                if (!userList.isEmpty()) {
+                                    ar[1]= userList.get(0).get("id").toString();
+                                    ar[0]=token;
+                                    return ar;
+                                }
+                                throw new NoUserException("No user exists");
+                            }
+                            throw new RuntimeException("Unexpected error");
+                        })
+                        .onErrorResume(ex -> {
+                            if (ex instanceof NoUserException) {
+                                return Mono.error(ex);
+                            } else {
+                                return Mono.error(new RuntimeException("Unexpected error"));
+                            }
+                        }));
     }
 
 }

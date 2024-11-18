@@ -1,6 +1,7 @@
 package org.example.Services;
 
-import org.example.DTO.Convertion.DTOtoUser;
+import org.example.DTO.Convertion.SignUptoUser;
+import org.example.DTO.EditUser;
 import org.example.DTO.SignUpRequest;
 import org.example.Exceptions.AlreadyExistsException;
 import org.example.Exceptions.InvalidFormatException;
@@ -25,7 +26,7 @@ public class UserService {
         return authService.addUser(user.email, user.password, user.firstName, user.lastName, user.role)
                 .flatMap(result -> {
                     try {
-                        User savedUser = userRepository.save(DTOtoUser.convert(user));
+                        User savedUser = userRepository.save(SignUptoUser.convert(user));
                         return Mono.just(Optional.of(savedUser));
                     } catch (Exception e) {
                         return Mono.error(new RuntimeException("Unexpected error", e));
@@ -56,15 +57,14 @@ public class UserService {
     }
 
     // Update User
-    public User updateUser(String email, User userDetails) {
+    public User updateUser(String email, EditUser userDetails) {
         return userRepository.findById(email).map(user -> {
-            user.setPhoneNumber(userDetails.getPhoneNumber());
-            user.setFirstName(userDetails.getFirstName());
-            user.setLastName(userDetails.getLastName());
-            user.setAddressLine1(userDetails.getAddressLine1());
-            user.setAddressLine2(userDetails.getAddressLine2());
-            user.setAddressLine3(userDetails.getAddressLine3());
-            user.setProfilePhoto(userDetails.getProfilePhoto());
+            user.setPhoneNumber(userDetails.phoneNumber);
+            user.setFirstName(userDetails.firstName);
+            user.setLastName(userDetails.lastName);
+            user.setAddressLine1(userDetails.addressLine1);
+            user.setAddressLine2(userDetails.addressLine2);
+            user.setAddressLine3(userDetails.addressLine3);
             return userRepository.save(user);
         }).orElseThrow(() -> new RuntimeException("User not found with email: " + email));
     }
