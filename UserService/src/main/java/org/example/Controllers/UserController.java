@@ -1,6 +1,7 @@
 package org.example.Controllers;
 
 import lombok.RequiredArgsConstructor;
+import org.example.DTO.EditUser;
 import org.example.Models.User;
 import org.example.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,7 @@ public class UserController {
 
     // Update User
     @PutMapping("/{email}")
-    public ResponseEntity<User> updateUser(@PathVariable String email, @RequestBody User userDetails) {
+    public ResponseEntity<User> updateUser(@PathVariable String email, @RequestBody EditUser userDetails) {
         try {
             User updatedUser = userService.updateUser(email, userDetails);
             return ResponseEntity.ok(updatedUser);

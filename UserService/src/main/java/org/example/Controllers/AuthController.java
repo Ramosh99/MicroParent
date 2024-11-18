@@ -1,5 +1,6 @@
 package org.example.Controllers;
 
+import org.example.DTO.EditUser;
 import org.example.DTO.LoginRequest;
 import org.example.DTO.SignUpRequest;
 import org.example.Exceptions.AlreadyExistsException;
@@ -12,10 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
@@ -58,6 +56,19 @@ public class AuthController {
                         return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error"));
                     }
                 });
+    }
+
+
+    // Update User
+    @PutMapping("/{email}")
+    public ResponseEntity<User> updateUser(@PathVariable String email, @RequestBody EditUser userDetails) {
+        try {
+            User updatedUser = userService.updateUser(email, userDetails);
+            return ResponseEntity.ok(updatedUser);
+        } catch (RuntimeException e) {
+            System.out.println("Error: "+e);
+            return ResponseEntity.notFound().build();
+        }
     }
 
 }
