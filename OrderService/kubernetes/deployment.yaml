@@ -13,10 +13,10 @@ spec:
         app: orderservice
     spec:
       containers:
-        - name: SERVICE_NAME
+        - name: orderservice
           image: gcr.io/pelagic-diorama-442307-c0/orderservice:latest
           ports:
             - containerPort: 8080
           envFrom:
             - configMapRef:
-                name: microservices-config
+                name: orderservice-config
