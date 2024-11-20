@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orderservice
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: orderservice
+  template:
+    metadata:
+      labels:
+        app: orderservice
+    spec:
+      containers:
+        - name: orderservice
+          image: gcr.io/my-project-2-442306/orderservice:v1
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 15
