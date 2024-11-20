@@ -1,25 +1,24 @@
 steps:
-  # Build the JAR file
-  - name: 'maven:3.8-jdk-17'
-    entrypoint: mvn
-    args: ['clean', 'package', '-DskipTests']
-
-  # Build the Docker image
+  # Build the container image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/my-project-2-442306/orderservice:v1', '.']
+    args: ['build', '-t', 'gcr.io/pelagic-diorama-442307-c0/orderservice:v1, '.']
 
-  # Push the Docker image to Container Registry
+  # Push the container image to Container Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/my-project-2-442306/orderservice:v1']
+    args: ['push', 'gcr.io/pelagic-diorama-442307-c0/orderservice:v1']
 
-  # Update the deployment
+  # Deploy container image to GKE
   - name: 'gcr.io/cloud-builders/gke-deploy'
     args:
       - run
       - --filename=kubernetes
-      - --location=us-central1
-      - --cluster=springboot-cluster
-      - --image=gcr.io/my-project-2-442306/orderservice:v1
+      - --location=${_REGION}
+      - --cluster=${_CLUSTER_NAME}
+
+substitutions:
+  _SERVICE_NAME: microservices-deployer
+  _REGION: us-central1
+  _CLUSTER_NAME: new-cluster-1
 
 images:
-  - 'gcr.io/my-project-2-442306/orderservice:v1'
+  - 'gcr.io/pelagic-diorama-442307-c0/orderservice:v1'

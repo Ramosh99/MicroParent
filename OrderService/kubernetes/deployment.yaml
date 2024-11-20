@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: orderservice
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: orderservice
@@ -13,20 +13,10 @@ spec:
         app: orderservice
     spec:
       containers:
-        - name: orderservice
-          image: gcr.io/my-project-2-442306/orderservice:v1
+        - name: SERVICE_NAME
+          image: gcr.io/pelagic-diorama-442307-c0/orderservice:latest
           ports:
             - containerPort: 8080
-          resources:
-            requests:
-              memory: "512Mi"
-              cpu: "500m"
-            limits:
-              memory: "1Gi"
-              cpu: "1000m"
-          livenessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8080
-            initialDelaySeconds: 60
-            periodSeconds: 15
+          envFrom:
+            - configMapRef:
+                name: microservices-config
