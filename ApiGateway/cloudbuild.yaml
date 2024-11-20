@@ -1,0 +1,25 @@
+steps:
+  # Build the JAR file
+  - name: 'maven:3.8-jdk-17'
+    entrypoint: mvn
+    args: ['clean', 'package', '-DskipTests']
+
+  # Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/my-project-2-442306/apigateway:v1', '.']
+
+  # Push the Docker image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/my-project-2-442306/apigateway:v1']
+
+  # Update the deployment
+  - name: 'gcr.io/cloud-builders/gke-deploy'
+    args:
+      - run
+      - --filename=kubernetes
+      - --location=us-central1
+      - --cluster=springboot-cluster
+      - --image=gcr.io/my-project-2-442306/apigateway:v1
+
+images:
+  - 'gcr.io/my-project-2-442306/apigateway:v1'
