@@ -100,4 +100,10 @@ public class OrderController {
         return ResponseEntity.ok(orderDetails);
     }
 
+    @GetMapping("/test")
+    @ResponseStatus(HttpStatus.OK)
+    public String test(){
+        return "Order Service is up and running, and work done with dockercomposer 10";
+    }
+
 }

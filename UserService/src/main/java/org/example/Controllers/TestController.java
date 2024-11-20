@@ -19,4 +19,9 @@ public class TestController {
     public String testBuyer() {
         return "Test passed";
     }
+
+    @GetMapping("trial")
+    public String test() {
+        return "Test passed in user services";
+    }
 }

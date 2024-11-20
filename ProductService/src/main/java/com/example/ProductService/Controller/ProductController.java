@@ -33,6 +33,11 @@ public class ProductController {
         }
         return result;
     }
+    @GetMapping("/test")
+    @ResponseStatus(HttpStatus.OK)
+    public String test(){
+        return "Product Service is up and running";
+    }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)

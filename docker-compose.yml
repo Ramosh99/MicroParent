@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  build:
+    image: maven:3.8.4-openjdk-17
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    command: mvn clean install
+
+  api-gateway:
+    build:
+      context: ./ApiGateway
+      dockerfile: Dockerfile
+      args:
+        - JAR_FILE=target/*.jar
+    ports:
+      - "8080:8080"
+    networks:
+      - microservices-network
+    depends_on:
+      - build
+    volumes:
+      - ./ApiGateway/target:/workspace/ApiGateway/target
+
+  order-service:
+    build:
+      context: ./OrderService
+      dockerfile: Dockerfile
+      args:
+        - JAR_FILE=target/*.jar
+    ports:
+      - "8081:8081"
+    networks:
+      - microservices-network
+    depends_on:
+      - build
+    volumes:
+      - ./OrderService/target:/workspace/OrderService/target
+
+  product-service:
+    build:
+      context: ./ProductService
+      dockerfile: Dockerfile
+      args:
+        - JAR_FILE=target/*.jar
+    ports:
+      - "8082:8082"
+    networks:
+      - microservices-network
+    depends_on:
+      - build
+    volumes:
+      - ./ProductService/target:/workspace/ProductService/target
+
+  user-service:
+    build:
+      context: ./UserService
+      dockerfile: Dockerfile
+      args:
+        - JAR_FILE=target/*.jar
+    ports:
+      - "8083:8083"
+    networks:
+      - microservices-network
+    depends_on:
+      - build
+    volumes:
+      - ./UserService/target:/workspace/UserService/target
+
+networks:
+  microservices-network:
+    driver: bridge

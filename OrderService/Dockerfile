@@ -1,11 +1,11 @@
-FROM maven:3.8.4-openjdk-17-slim AS build
-WORKDIR /app
-COPY OrderService/pom.xml .
-COPY OrderService/src ./src
-RUN mvn clean package -DskipTests
+# Use a Java base image
+FROM openjdk:17-jdk-slim
 
-FROM openjdk:17-slim
-WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
-EXPOSE 8080
-ENTRYPOINT ["java","-jar","app.jar"]
+# Argument to specify the JAR file
+ARG JAR_FILE
+
+# Copy the JAR file to the container
+COPY ${JAR_FILE} app.jar
+
+# Run the application
+ENTRYPOINT ["java", "-jar", "/app.jar"]
