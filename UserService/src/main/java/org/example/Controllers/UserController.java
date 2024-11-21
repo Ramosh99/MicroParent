@@ -26,6 +26,10 @@ public class UserController {
         return data+" auth success";
     }
 
+    @GetMapping("trial")
+    public String test() {
+        return "Test passed in user services 11";
+    }
     // Get User by Email
     @GetMapping("/{email}")
     public ResponseEntity<User> getUserByEmail(@PathVariable String email) {

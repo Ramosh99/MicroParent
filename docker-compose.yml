@@ -1,60 +1,43 @@
 services:
   api-gateway:
     build:
-      context: ./ApiGateway
-      dockerfile: Dockerfile
-      args:
-        - JAR_FILE=target/*.jar
+      context: .
+      dockerfile: ApiGateway/Dockerfile
     image: gcr.io/pelagic-diorama-442307-c0/api-gateway:latest
     ports:
       - "8080:8080"
     networks:
       - microservices-network
-    volumes:
-      - ./ApiGateway/target:/workspace/ApiGateway/target
-
 
   order-service:
     build:
-      context: ./OrderService
-      dockerfile: Dockerfile
-      args:
-        - JAR_FILE=target/*.jar
+      context: .
+      dockerfile: OrderService/Dockerfile
     image: gcr.io/pelagic-diorama-442307-c0/order-service:latest
     ports:
       - "8081:8081"
     networks:
       - microservices-network
-    volumes:
-      - ./OrderService/target:/workspace/OrderService/target
 
   product-service:
     build:
-      context: ./ProductService
-      dockerfile: Dockerfile
-      args:
-        - JAR_FILE=target/*.jar
+      context: .
+      dockerfile: ProductService/Dockerfile
     image: gcr.io/pelagic-diorama-442307-c0/product-service:latest
     ports:
       - "8082:8082"
     networks:
       - microservices-network
-    volumes:
-      - ./ProductService/target:/workspace/ProductService/target
 
   user-service:
     build:
-      context: ./UserService
-      dockerfile: Dockerfile
-      args:
-        - JAR_FILE=target/*.jar
+      context: .
+      dockerfile: UserService/Dockerfile
     image: gcr.io/pelagic-diorama-442307-c0/user-service:latest
     ports:
       - "8083:8083"
     networks:
       - microservices-network
-    volumes:
-      - ./UserService/target:/workspace/UserService/target
 
 networks:
   microservices-network:

@@ -20,8 +20,5 @@ public class TestController {
         return "Test passed";
     }
 
-    @GetMapping("trial")
-    public String test() {
-        return "Test passed in user services";
-    }
+
 }

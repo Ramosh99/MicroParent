@@ -15,37 +15,13 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Set up JDK
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'adopt'
-          cache: 'maven'
-
-      # Build each service with Maven
-      - name: Build API Gateway
-        working-directory: ./ApiGateway
-        run: mvn clean package -DskipTests
-
-      - name: Build Order Service
-        working-directory: ./OrderService
-        run: mvn clean package -DskipTests
-
-      - name: Build Product Service
-        working-directory: ./ProductService
-        run: mvn clean package -DskipTests
-
-      - name: Build User Service
-        working-directory: ./UserService
-        run: mvn clean package -DskipTests
-
+      # Authenticate to Google Cloud
       - name: Google Cloud Auth
         uses: 'google-github-actions/auth@v2'
         with:
           credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
-      # Set up Google Cloud SDK
+      # Setup Google Cloud SDK
       - name: Setup Google Cloud SDK
         uses: 'google-github-actions/setup-gcloud@v2'
         with:
