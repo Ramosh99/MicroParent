@@ -26,16 +26,19 @@ jobs:
       # Install Docker Compose
       - name: Install Docker Compose
         run: |
-          echo "Installing Docker Compose..."
-          curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          chmod +x /usr/local/bin/docker-compose
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
           sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
           docker-compose version
+
+      # Authenticate Docker with Google Cloud
+      - name: Configure Docker
+        run: |
+          gcloud auth configure-docker
 
       # Build and push images
       - name: Build and Push Docker Images
         run: |
           echo "Building and pushing Docker images"
-          gcloud auth configure-docker
           docker-compose build
           docker-compose push
