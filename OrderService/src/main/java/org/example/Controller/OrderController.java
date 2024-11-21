@@ -105,5 +105,4 @@ public class OrderController {
     public String test(){
         return "Order Service is up and running, and work done with dockercomposer 10";
     }
-
 }
