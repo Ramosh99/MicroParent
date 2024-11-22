@@ -11,41 +11,43 @@ on:
 
 jobs:
   build:
-    runs-on: 'ubuntu-latest'
+    runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-    - name: Log in to registry
-      uses: docker/login-action@v2
-      with:
-        registry: https://index.docker.io/v1/
-        username: ${{ secrets.AzureAppService_ContainerUsername_49b3f60f1f304daf880ed3ab1e43d86f }}
-        password: ${{ secrets.AzureAppService_ContainerPassword_f23fa4ce3b3946d3b80a9ae665af61c0 }}
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          registry: https://index.docker.io/v1/
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Build and push container image to registry
-      uses: docker/build-push-action@v3
-      with:
-        push: true
-        tags: index.docker.io/${{ secrets.AzureAppService_ContainerUsername_49b3f60f1f304daf880ed3ab1e43d86f }}/ramosh99/order-service:${{ github.sha }}
-        file: ./OrderService/Dockerfile
+      - name: Build and push container image to Docker Hub
+        uses: docker/build-push-action@v3
+        with:
+          context: ./OrderService
+          file: ./OrderService/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/order-service:${{ github.sha }}
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
     environment:
-      name: 'production'
+      name: production
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
-    - name: Deploy to Azure Web App
-      id: deploy-to-webapp
-      uses: azure/webapps-deploy@v2
-      with:
-        app-name: 'order-service-deploy'
-        slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_8e1e42eba80049eba1d2c2ec11042985 }}
-        images: 'index.docker.io/${{ secrets.AzureAppService_ContainerUsername_49b3f60f1f304daf880ed3ab1e43d86f }}/ramosh99/order-service:${{ github.sha }}'
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'order-service-deploy'
+          slot-name: 'production'
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          images: ${{ secrets.DOCKER_USERNAME }}/order-service:${{ github.sha }}
