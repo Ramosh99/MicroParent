@@ -33,7 +33,7 @@ jobs:
       - name: Build and Push Docker Images
         run: |
           # Build images
-          docker-compose build
+          docker compose up
           
           # Tag images for Docker Hub
           docker tag api-gateway:latest ${{ secrets.DOCKERHUB_USERNAME }}/api-gateway:latest
