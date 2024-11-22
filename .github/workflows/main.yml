@@ -55,17 +55,12 @@ jobs:
       # Build and push images to Docker Hub
       - name: Build and Push Docker Images
         run: |
-          # Build images
+          # Build images with proper tags
+          DOCKER_USERNAME="${{ secrets.DOCKERHUB_USERNAME }}"
           docker compose build
           
-          # Tag images for Docker Hub
-          docker tag api-gateway:latest ${{ secrets.DOCKERHUB_USERNAME }}/api-gateway:latest
-          docker tag order-service:latest ${{ secrets.DOCKERHUB_USERNAME }}/order-service:latest
-          docker tag product-service:latest ${{ secrets.DOCKERHUB_USERNAME }}/product-service:latest
-          docker tag user-service:latest ${{ secrets.DOCKERHUB_USERNAME }}/user-service:latest
-          
-          # Push images to Docker Hub
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/api-gateway:latest
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/order-service:latest
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/product-service:latest
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/user-service:latest
+          # Push images directly (no need for separate tag command)
+          docker push $DOCKER_USERNAME/api-gateway:latest
+          docker push $DOCKER_USERNAME/order-service:latest
+          docker push $DOCKER_USERNAME/product-service:latest
+          docker push $DOCKER_USERNAME/user-service:latest
