@@ -60,6 +60,7 @@ jobs:
           DOCKER_USERNAME="${{ secrets.DOCKERHUB_USERNAME }}"
           docker compose build
           
+          
           # Push images directly (no need for separate tag command)
           docker push $DOCKER_USERNAME/api-gateway:latest
           docker push $DOCKER_USERNAME/order-service:latest
