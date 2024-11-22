@@ -31,7 +31,7 @@ jobs:
       with:
         push: true
         tags: index.docker.io/${{ secrets.AzureAppService_ContainerUsername_49b3f60f1f304daf880ed3ab1e43d86f }}/ramosh99/order-service:${{ github.sha }}
-        file: ./Dockerfile
+        file: ./OrderService/Dockerfile
 
   deploy:
     runs-on: ubuntu-latest
