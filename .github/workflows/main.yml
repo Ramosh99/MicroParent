@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - new-branch-name
+  workflow_dispatch:
 
 jobs:
   build:
