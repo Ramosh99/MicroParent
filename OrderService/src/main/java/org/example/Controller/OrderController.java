@@ -103,6 +103,6 @@ public class OrderController {
     @GetMapping("/test")
     @ResponseStatus(HttpStatus.OK)
     public String test(){
-        return "Order Service is upand running, and work done with dockercomposer latest version need to be tested plz work this";
+        return "Order Service is upand running,and work done with dockercomposer latest version need to be tested plz work this";
     }
 }
