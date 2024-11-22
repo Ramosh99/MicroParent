@@ -22,13 +22,28 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      # Build Java applications
+      # Generate Maven Wrapper and Build Projects
       - name: Build with Maven
         run: |
-          cd ApiGateway && ./mvnw clean package -DskipTests
-          cd ../OrderService && ./mvnw clean package -DskipTests
-          cd ../ProductService && ./mvnw clean package -DskipTests
-          cd ../UserService && ./mvnw clean package -DskipTests
+          # Generate Maven Wrapper and build ApiGateway
+          cd ApiGateway
+          mvn -N io.takari:maven:wrapper
+          ./mvnw clean package -DskipTests
+          
+          # Generate Maven Wrapper and build OrderService
+          cd ../OrderService
+          mvn -N io.takari:maven:wrapper
+          ./mvnw clean package -DskipTests
+          
+          # Generate Maven Wrapper and build ProductService
+          cd ../ProductService
+          mvn -N io.takari:maven:wrapper
+          ./mvnw clean package -DskipTests
+          
+          # Generate Maven Wrapper and build UserService
+          cd ../UserService
+          mvn -N io.takari:maven:wrapper
+          ./mvnw clean package -DskipTests
 
       # Login to Docker Hub
       - name: Login to Docker Hub
